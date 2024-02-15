@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-image: url('fon.jpg');
+      background-color: #1a1a1a;
+      font-family: 'Arial', sans-serif;
+      color: #fff;
+    }
+
+    #game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #score-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(20, 25px);
+      gap: 1px; /* Уменьшили зазор между клетками */
+      background-color: #226b25;
+      border: 5px solid #333;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .cell {
+      width: 25px;
+      height: 25px;
+      border: 1px solid #333;
+      box-sizing: border-box;
+      border-radius: 5px;
+    }
+
+    .snake {
+      background-color: #01ca0b;
+      border-radius: 50%;
+    }
+
+    .food {
+      background-color: #ff0000;
+      border-radius: 50%;
+    }
+
+    #individual-score {
+      text-align: left;
+    }
+
+    #total-score {
+      text-align: right;
+    }
+  </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const gameContainer = document.getElementById("game-container");
+      const board = document.getElementById("game-board");
+      const individualScore = document.getElementById("individual-score");
+      const totalScore = document.getElementById("total-score");
+      const gridSize = 20;
+      let snake = [{ row: 0, col: 0 }];
+      let foods = [];
+      let direction = "right";
+      let individualCounter = 0;
+      let totalCounter = 0;
+
+      function createBoard() {
+        for (let row = 0; row < gridSize; row++) {
+          for (let col = 0; col < gridSize; col++) {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+            board.appendChild(cell);
+          }
+        }
+      }
+
+      function drawSnake() {
+        const cells = document.querySelectorAll(".cell");
+        cells.forEach(cell => cell.style.backgroundColor = '');
+
+        snake.forEach(segment => {
+          const index = segment.row * gridSize + segment.col;
+          cells[index].style.backgroundColor = '#388e3c';
+        });
+      }
+
+      function drawFood() {
+        const cells = document.querySelectorAll(".cell");
+        foods.forEach(food => {
+          const index = food.row * gridSize + food.col;
+          cells[index].style.backgroundColor = '#FF5722';
+        });
+      }
+
+      function moveSnake() {
+        const head = Object.assign({}, snake[0]);
+
+        switch (direction) {
+          case "up":
+            head.row--;
+            break;
+          case "down":
+            head.row++;
+            break;
+          case "left":
+            head.col--;
+            break;
+          case "right":
+            head.col++;
+            break;
+        }
+
+        snake.unshift(head);
+
+        const eatenFoodIndex = foods.findIndex(food => food.row === head.row && food.col === head.col);
+
+        if (eatenFoodIndex !== -1) {
+          foods.splice(eatenFoodIndex, 1);
+          individualCounter += 10;
+          totalCounter += 10;
+          generateFood();
+        } else {
+          snake.pop();
+        }
+
+        updateScores();
+      }
+
+      function updateScores() {
+        individualScore.textContent = `Individual Score: ${individualCounter}`;
+        totalScore.textContent = `Total Score: ${totalCounter}`;
+      }
+
+      function generateFood() {
+        const food = {
+          row: Math.floor(Math.random() * gridSize),
+          col: Math.floor(Math.random() * gridSize)
+        };
+
+        if (snake.some(segment => segment.row === food.row && segment.col === food.col) || foods.some(f => f.row === food.row && f.col === food.col)) {
+          generateFood();
+        } else {
+          foods.push(food);
+        }
+      }
+
+      function checkCollision() {
+        const head = snake[0];
+        return (
+          head.row < 0 ||
+          head.row >= gridSize ||
+          head.col < 0 ||
+          head.col >= gridSize ||
+          snake.slice(1).some(segment => segment.row === head.row && segment.col === head.col)
+        );
+      }
+
+      function updateGame() {
+        moveSnake();
+        if (checkCollision()) {
+          alert("Game Over!");
+          snake = [{ row: 0, col: 0 }];
+          foods = [];
+          direction = "right";
+          individualCounter = 0;
+          generateFood(); // Добавим вызов generateFood() при завершении игры
+        }
+
+        drawSnake();
+        drawFood();
+      }
+
+      function handleKeyPress(event) {
+        switch (event.key) {
+          case "ArrowUp":
+            direction = "up";
+            break;
+          case "ArrowDown":
+            direction = "down";
+            break;
+          case "ArrowLeft":
+            direction = "left";
+            break;
+          case "ArrowRight":
+            direction = "right";
+            break;
+        }
+      }
+
+      createBoard();
+      generateFood();
+      updateScores();
+      setInterval(updateGame, 200);
+      window.addEventListener("keydown", handleKeyPress);
+    });
+  </script>
+</head>
+<body>
+  <div id="game-container">
+    <div id="score-container">
+      <div id="individual-score">Individual Score: 0</div>
+      <div id="total-score">Total Score: 0</div>
+    </div>
+    <div id="game-board"></div>
+  </div>
+</body>
+</html>
