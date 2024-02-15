@@ -11,7 +11,7 @@
       height: 100vh;
       margin: 0;
       background-image: url('fon.jpg');
-      background-color: #1a1a1a;
+      background-color: #1a2a1a;
       font-family: 'Arial', sans-serif;
       color: #fff;
     }
@@ -33,7 +33,7 @@
       display: grid;
       grid-template-columns: repeat(20, 25px);
       gap: 1px; /* Уменьшили зазор между клетками */
-      background-color: #226b25;
+      background-color: #216b25;
       border: 5px solid #333;
       border-radius: 10px;
       overflow: hidden;
